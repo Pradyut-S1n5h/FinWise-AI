@@ -1,0 +1,165 @@
+/* -------------------------------------------------------------
+   FINWISE AI - NAVIGATION BAR & DRAWER STYLES
+------------------------------------------------------------- */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(5, 5, 8, 0.75);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border-light);
+    transition: var(--transition-smooth);
+}
+.navbar.scrolled {
+    padding: 8px 0;
+    background: rgba(5, 5, 8, 0.95);
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.45rem;
+    color: #FFF;
+    position: relative;
+}
+.logo-icon {
+    color: var(--primary);
+    font-size: 1.6rem;
+}
+.logo-glow {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 25px;
+    height: 25px;
+    background: var(--primary);
+    filter: blur(12px);
+    border-radius: 50%;
+    opacity: 0.6;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 32px;
+}
+.nav-item {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.nav-item:hover, .nav-item.active-nav {
+    color: #FFF;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #FFF;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Mobile Drawer */
+.mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: #060919;
+    border-left: 1px solid var(--border-light);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.mobile-drawer.open {
+    right: 0;
+}
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+.drawer-close {
+    background: none;
+    border: none;
+    color: #FFF;
+    font-size: 2rem;
+    cursor: pointer;
+}
+.drawer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.drawer-link-item {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.drawer-link-item:hover {
+    color: #FFF;
+}
+.drawer-btn {
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* Sign Out Actions Buttons styling */
+#logout-btn {
+    border-color: rgba(255, 23, 68, 0.2);
+}
+#logout-btn:hover {
+    background: rgba(255, 23, 68, 0.1);
+    border-color: rgba(255, 23, 68, 0.5);
+    color: #FF1744;
+}
+
+#logout-btn-mobile {
+    border-color: rgba(255, 23, 68, 0.2);
+    color: var(--text-secondary);
+}
+#logout-btn-mobile:hover {
+    background: rgba(255, 23, 68, 0.1);
+    color: #FF1744;
+}
+
+/* Responsive Rules for Nav */
+@media (max-width: 992px) {
+    .nav-links, .nav-actions {
+        display: none;
+    }
+    .mobile-toggle {
+        display: block;
+    }
+}

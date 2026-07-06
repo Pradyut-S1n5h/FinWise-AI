@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinWise AI - Loan Eligibility Diagnostics</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    
+    <!-- Confetti & Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Security Session Router loaded first -->
+    <script src="../js/auth.js"></script>
+</head>
+<body>
+
+    <!-- Sticky Header Navbar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-logo">
+                <div class="logo-glow"></div>
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </a>
+            
+            <nav class="nav-links" id="navbar-menu" role="navigation" aria-label="Main Navigation">
+                <a href="dashboard.html" class="nav-item">Overview</a>
+                <a href="eligibility.html" class="nav-item active-nav">Eligibility</a>
+                <a href="credit.html" class="nav-item">Credit Analysis</a>
+                <a href="calculator.html" class="nav-item">EMI Calculator</a>
+                <a href="advisor.html" class="nav-item">AI Advisor</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="btn btn-secondary btn-icon" id="open-settings-btn" title="API Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="btn-text">Developer API</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="logout-btn" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="btn-text">Sign Out</span>
+                </button>
+            </div>
+            
+            <button class="mobile-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navbar-menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-drawer" id="mobile-drawer-menu" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="nav-logo">
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </div>
+            <button class="drawer-close" id="mobile-drawer-close">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="dashboard.html" class="drawer-link-item">Overview</a>
+            <a href="eligibility.html" class="drawer-link-item active-nav">Eligibility</a>
+            <a href="credit.html" class="drawer-link-item">Credit Analysis</a>
+            <a href="calculator.html" class="drawer-link-item">EMI Calculator</a>
+            <a href="advisor.html" class="drawer-link-item">AI Advisor</a>
+            <button class="btn btn-secondary drawer-btn" id="open-settings-btn-mobile">
+                <i class="fa-solid fa-sliders"></i> Developer API
+            </button>
+            <button class="btn btn-secondary drawer-btn" id="logout-btn-mobile">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <main class="animate-fade-in" style="padding-top: 120px; padding-bottom: 80px;">
+        <div class="container">
+            <div class="section-header text-center">
+                <h1 class="section-title">Loan Eligibility Checker</h1>
+                <p class="section-subtitle">Underwrite borrower telemetry and calculate DTI debt capacities and approval thresholds instantly.</p>
+            </div>
+            
+            <div class="dashboard-container glass-card">
+                
+                <!-- Left Sidebar Navigation Pane -->
+                <aside class="dashboard-tabs">
+                    <a href="dashboard.html" class="tab-btn"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                    <a href="eligibility.html" class="tab-btn active"><i class="fa-solid fa-clipboard-check"></i> Loan Checker</a>
+                    <a href="credit.html" class="tab-btn"><i class="fa-solid fa-gauge-high"></i> Credit Analyzer</a>
+                    <a href="calculator.html" class="tab-btn"><i class="fa-solid fa-calculator"></i> EMI Calculator</a>
+                    <a href="compare.html" class="tab-btn"><i class="fa-solid fa-code-compare"></i> Loan Comparison</a>
+                    <a href="planner.html" class="tab-btn"><i class="fa-solid fa-bullseye"></i> Goal Planner</a>
+                    <a href="advisor.html" class="tab-btn"><i class="fa-solid fa-robot"></i> AI Advisor</a>
+                    <button type="button" onclick="openReportsModal()" class="tab-btn"><i class="fa-solid fa-folder-open"></i> Reports</button>
+                    <button type="button" onclick="openSettingsModal()" class="tab-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+                    <button type="button" onclick="handleLogout()" class="tab-btn text-red" style="margin-top: auto; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </aside>
+                
+                <div class="dashboard-content">
+                    <div class="panel-grid">
+                        
+                        <!-- Left form side -->
+                        <div class="panel-input-side">
+                            <h3 class="panel-block-title">Borrower Parameters</h3>
+                            <form id="eligibility-form" class="dashboard-form">
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label for="input-age">Age (Years)</label>
+                                        <input type="number" id="input-age" class="form-input" min="18" max="100" value="28" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-employment">Employment Type</label>
+                                        <select id="input-employment" class="form-input" required>
+                                            <option value="salaried" selected>Salaried Professional</option>
+                                            <option value="self-employed">Self-Employed Entrepreneur</option>
+                                            <option value="business-owner">Business Owner</option>
+                                            <option value="freelancer">Freelancer / Gig Worker</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="range-income" class="range-label">
+                                        <span>Monthly Net Income</span>
+                                        <span class="range-value" id="val-income">₹65,000</span>
+                                    </label>
+                                    <input type="range" id="range-income" class="slider-input" min="10000" max="500000" step="5000" value="65000">
+                                </div>
+                                
+                                <div class="form-group-row">
+                                    <div class="form-group">
+                                        <label for="input-credit">Credit Score (300-850)</label>
+                                        <input type="number" id="input-credit" class="form-input" min="300" max="850" value="710" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-existing-emi">Existing Monthly EMIs (₹)</label>
+                                        <input type="number" id="input-existing-emi" class="form-input" min="0" value="8000">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="range-loan-amount" class="range-label">
+                                        <span>Required Loan Amount</span>
+                                        <span class="range-value" id="val-loan-amount">₹5,00,000</span>
+                                    </label>
+                                    <input type="range" id="range-loan-amount" class="slider-input" min="50000" max="10000000" step="50000" value="500000">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="input-purpose">Loan Purpose</label>
+                                    <select id="input-purpose" class="form-input" required>
+                                        <option value="home" selected>Home Purchase or Renovation</option>
+                                        <option value="education">Higher Education / Student Loan</option>
+                                        <option value="personal">Personal / Medical Emergency</option>
+                                        <option value="business">Business Expansion / Startup Capital</option>
+                                        <option value="vehicle">Auto / Vehicle Financing</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-block" id="btn-assess-eligibility">
+                                    <i class="fa-solid fa-microchip"></i>
+                                    <span>Run Diagnostic Engine</span>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Right result side -->
+                        <div class="panel-result-side">
+                            <div class="result-card-header">
+                                <h3 class="panel-block-title">Assessment Report</h3>
+                                <button class="btn btn-secondary btn-sm" id="btn-save-report" disabled>
+                                    <i class="fa-solid fa-file-pdf"></i> Save Report
+                                </button>
+                            </div>
+                            
+                            <div class="assessment-placeholder" id="checker-placeholder">
+                                <i class="fa-solid fa-server diagnostic-icon text-muted"></i>
+                                <p>Adjust parameters and click the button to trigger the risk and underwriting diagnostics engine.</p>
+                            </div>
+                            
+                            <div class="assessment-results hidden" id="checker-results">
+                                <!-- Approval Big Status -->
+                                <div class="status-summary-box">
+                                    <div class="status-indicator-ring Approved" id="status-indicator">
+                                        <span class="status-text" id="result-status">Approved</span>
+                                        <span class="status-sub" id="result-confidence">92% Confidence</span>
+                                    </div>
+                                    <div class="status-details">
+                                        <div class="detail-row">
+                                            <span class="detail-label">Eligible Amount:</span>
+                                            <span class="detail-value text-success" id="result-eligible-amt">₹68,500</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Risk Profile Index:</span>
+                                            <span class="detail-value" id="result-risk-level">Low Risk</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Debt-to-Income (DTI):</span>
+                                            <span class="detail-value" id="result-dti">12.3%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Progress visual DTI -->
+                                <div class="dti-meter-wrapper">
+                                    <div class="meter-label">
+                                        <span>DTI Ratio Index</span>
+                                        <span class="meter-value" id="result-dti-label">12.3%</span>
+                                    </div>
+                                    <div class="meter-bar">
+                                        <div class="meter-fill fill-green" id="result-dti-fill" style="width: 12.3%"></div>
+                                    </div>
+                                    <div class="meter-scale">
+                                        <span>0%</span>
+                                        <span>35% (Max Target)</span>
+                                        <span>50%+ (Danger)</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Matching Product Box -->
+                                <div class="product-recom-box">
+                                    <div class="product-badge">Matched Product</div>
+                                    <h4 class="product-title" id="recom-loan-title">FinWise Prime Mortgage</h4>
+                                    <p class="product-desc" id="recom-loan-desc">Recommended for Home loan purposes with a credit profile above 700. Eligible for premium interest rates.</p>
+                                    <div class="product-meta">
+                                        <div>
+                                            <span class="meta-lbl">Est. Interest Rate</span>
+                                            <strong class="meta-val text-accent" id="recom-loan-rate">5.4% APR</strong>
+                                        </div>
+                                        <div>
+                                            <span class="meta-lbl">Max Term</span>
+                                            <strong class="meta-val" id="recom-loan-tenure">30 Years</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- AI Suggestion Summary -->
+                                <div class="ai-suggestion-box">
+                                    <div class="ai-suggest-title">
+                                        <i class="fa-solid fa-sparkles text-accent"></i>
+                                        <span>Claude AI Suggestions</span>
+                                    </div>
+                                    <p class="ai-suggest-text" id="result-ai-suggestions">
+                                        Your DTI is highly optimal. To lock in the premium 5.4% rate, submit your tax documentation within the next 48 hours to complete verification.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="nav-logo">
+                    <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                    <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+                </div>
+                <p class="footer-bio">Empowering financial underwriting decisions through modern, accessible AI-driven data synthesis and interactive calculation models.</p>
+            </div>
+            
+            <div class="footer-links-grid">
+                <div class="links-col">
+                    <h5>Platform</h5>
+                    <a href="dashboard.html">Overview</a>
+                    <a href="eligibility.html">Eligibility</a>
+                    <a href="calculator.html">EMI Calculator</a>
+                    <a href="advisor.html">AI Advisor</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 FinWise AI Platform. All rights reserved. Underwriting outputs represent mathematical simulations and do not constitute direct banking approvals.</p>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal" aria-hidden="true" role="dialog" aria-labelledby="settings-modal-title">
+        <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="settings-modal-title"><i class="fa-solid fa-sliders text-accent"></i> API & Webhook Configuration</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settings-form" class="dashboard-form">
+                    <div class="form-group">
+                        <label for="settings-claude-key">Anthropic Claude API Key</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="settings-claude-key" class="form-input" placeholder="sk-ant-...">
+                            <button type="button" class="btn-toggle-visibility" onclick="togglePasswordVisibility('settings-claude-key')">
+                                <i class="fa-solid fa-eye" id="settings-claude-key-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="settings-sheets-url">Google Sheets Webhook</label>
+                        <input type="url" id="settings-sheets-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="settings-force-delay" checked>
+                        <label for="settings-force-delay">Simulate API Loading Network Delays (2.5 seconds)</label>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Discard</button>
+                        <button type="submit" class="btn btn-primary">Save System Config</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report PDF Modal (Mock Preview) -->
+    <div class="modal" id="report-modal" aria-hidden="true" role="dialog" aria-labelledby="report-modal-title">
+        <div class="modal-backdrop" onclick="closeReportModal()"></div>
+        <div class="modal-content report-modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="report-modal-title"><i class="fa-solid fa-file-invoice-dollar text-primary"></i> Underwriting Certificate Summary</h3>
+                <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="report-pdf-body">
+                <!-- PDF Render Structure styled cleanly -->
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="closeReportModal()">Close Preview</button>
+                <button class="btn btn-primary" onclick="printReport()"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+                <button class="btn btn-accent" onclick="emailUnderwritingReport()"><i class="fa-solid fa-envelope"></i> Email Report</button>
+                <button class="btn btn-secondary" onclick="shareUnderwritingReport()"><i class="fa-solid fa-share-nodes"></i> Share Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Reports Modal -->
+    <div class="modal" id="reports-modal" aria-hidden="true" role="dialog" aria-labelledby="reports-modal-title">
+        <div class="modal-backdrop" onclick="closeReportsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="reports-modal-title"><i class="fa-solid fa-folder-open text-primary"></i> Saved Underwriting Reports</h3>
+                <button class="modal-close" onclick="closeReportsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Historical diagnostics saved under Rahul's corporate profile:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Mortgage Telemetry FW-9827</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 5, 2026</span>
+                        </div>
+                        <a href="eligibility.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Personal Credit Pre-Check</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 3, 2026</span>
+                        </div>
+                        <a href="credit.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button class="btn btn-secondary btn-block" onclick="closeReportsModal()">Close Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Wrapper -->
+    <div class="toast-container" id="toast-wrapper"></div>
+
+    <!-- Scripts -->
+    <script src="../data/constants.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/loan.js"></script>
+    <script src="../js/api.js"></script>
+</body>
+</html>

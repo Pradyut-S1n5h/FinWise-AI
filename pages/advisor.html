@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinWise AI - Financial Advisor Co-Pilot</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    
+    <!-- Security Session Router loaded first -->
+    <script src="../js/auth.js"></script>
+</head>
+<body>
+
+    <!-- Sticky Header Navbar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-logo">
+                <div class="logo-glow"></div>
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </a>
+            
+            <nav class="nav-links" id="navbar-menu" role="navigation" aria-label="Main Navigation">
+                <a href="dashboard.html" class="nav-item">Overview</a>
+                <a href="eligibility.html" class="nav-item">Eligibility</a>
+                <a href="credit.html" class="nav-item">Credit Analysis</a>
+                <a href="calculator.html" class="nav-item">EMI Calculator</a>
+                <a href="advisor.html" class="nav-item active-nav">AI Advisor</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="btn btn-secondary btn-icon" id="open-settings-btn" title="API Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="btn-text">Developer API</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="logout-btn" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="btn-text">Sign Out</span>
+                </button>
+            </div>
+            
+            <button class="mobile-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navbar-menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-drawer" id="mobile-drawer-menu" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="nav-logo">
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </div>
+            <button class="drawer-close" id="mobile-drawer-close">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="dashboard.html" class="drawer-link-item">Overview</a>
+            <a href="eligibility.html" class="drawer-link-item">Eligibility</a>
+            <a href="credit.html" class="drawer-link-item">Credit Analysis</a>
+            <a href="calculator.html" class="drawer-link-item">EMI Calculator</a>
+            <a href="advisor.html" class="drawer-link-item active-nav">AI Advisor</a>
+            <button class="btn btn-secondary drawer-btn" id="open-settings-btn-mobile">
+                <i class="fa-solid fa-sliders"></i> Developer API
+            </button>
+            <button class="btn btn-secondary drawer-btn" id="logout-btn-mobile">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="animate-fade-in" style="padding-top: 120px; padding-bottom: 80px;">
+        <div class="container">
+            <div class="section-header text-center">
+                <h1 class="section-title">AI Financial Advisor Co-Pilot</h1>
+                <p class="section-subtitle">Consult with the Claude co-pilot system. Retrieve structured roadmaps and budgeting suggestions.</p>
+            </div>
+            
+            <div class="dashboard-container glass-card">
+                
+                <!-- Left Sidebar Navigation Pane -->
+                <aside class="dashboard-tabs">
+                    <a href="dashboard.html" class="tab-btn"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                    <a href="eligibility.html" class="tab-btn"><i class="fa-solid fa-clipboard-check"></i> Loan Checker</a>
+                    <a href="credit.html" class="tab-btn"><i class="fa-solid fa-gauge-high"></i> Credit Analyzer</a>
+                    <a href="calculator.html" class="tab-btn"><i class="fa-solid fa-calculator"></i> EMI Calculator</a>
+                    <a href="compare.html" class="tab-btn"><i class="fa-solid fa-code-compare"></i> Loan Comparison</a>
+                    <a href="planner.html" class="tab-btn"><i class="fa-solid fa-bullseye"></i> Goal Planner</a>
+                    <a href="advisor.html" class="tab-btn active"><i class="fa-solid fa-robot"></i> AI Advisor</a>
+                    <button type="button" onclick="openReportsModal()" class="tab-btn"><i class="fa-solid fa-folder-open"></i> Reports</button>
+                    <button type="button" onclick="openSettingsModal()" class="tab-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+                    <button type="button" onclick="handleLogout()" class="tab-btn text-red" style="margin-top: auto; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </aside>
+                
+                <div class="dashboard-content">
+                    <div class="panel-grid-full">
+                        <div class="chat-interface-wrapper">
+                            <!-- Chat Header -->
+                            <div class="chat-header">
+                                <div class="chat-advisor-info">
+                                    <div class="advisor-avatar">
+                                        <i class="fa-solid fa-robot"></i>
+                                        <span class="avatar-glow"></span>
+                                    </div>
+                                    <div class="advisor-text">
+                                        <h4>Claude AI Financial Co-Pilot</h4>
+                                        <span class="status-online"><span class="dot"></span> Online</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="btn-clear-chat">
+                                    <i class="fa-solid fa-trash-can"></i> Clear Chat
+                                </button>
+                            </div>
+                            
+                            <!-- Chat Messages Stream -->
+                            <div class="chat-body" id="chat-messages-container">
+                                <div class="message message-bot">
+                                    <div class="message-bubble">
+                                        <p>Hello! I am your AI Financial Advisor. Based on the parameters currently loaded on the dashboard, I can generate specialized blueprints. Choose one of the prompts below or type your custom query:</p>
+                                    </div>
+                                    <span class="message-time">Just Now</span>
+                                </div>
+                                
+                                <!-- Loading skeletons -->
+                                <div class="message message-bot hidden" id="chat-typing-indicator">
+                                    <div class="message-bubble typing-bubble">
+                                        <div class="typing-indicator-dots">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Suggested quick Prompts -->
+                            <div class="chat-suggestions">
+                                <button class="suggestion-tag" onclick="sendQuickPrompt('savings')">
+                                    <i class="fa-solid fa-piggy-bank"></i> Savings Maximization Tips
+                                </button>
+                                <button class="suggestion-tag" onclick="sendQuickPrompt('budget')">
+                                    <i class="fa-solid fa-chart-pie"></i> Budget Plan Strategy
+                                </button>
+                                <button class="suggestion-tag" onclick="sendQuickPrompt('debt')">
+                                    <i class="fa-solid fa-compress"></i> Debt Reduction Roadmap
+                                </button>
+                                <button class="suggestion-tag" onclick="sendQuickPrompt('emergency')">
+                                    <i class="fa-solid fa-kit-medical"></i> Emergency Fund Advisor
+                                </button>
+                            </div>
+                            
+                            <!-- Chat Input Area -->
+                            <div class="chat-input-row">
+                                <input type="text" id="chat-user-input" placeholder="Ask anything about interest rates, debt management, or savings..." aria-label="Query for financial advisor">
+                                <button class="btn btn-primary" id="btn-chat-send" aria-label="Send message">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="nav-logo">
+                    <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                    <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+                </div>
+                <p class="footer-bio">Empowering financial underwriting decisions through modern, accessible AI-driven data synthesis and interactive calculation models.</p>
+            </div>
+            
+            <div class="footer-links-grid">
+                <div class="links-col">
+                    <h5>Platform</h5>
+                    <a href="dashboard.html">Overview</a>
+                    <a href="eligibility.html">Eligibility</a>
+                    <a href="calculator.html">EMI Calculator</a>
+                    <a href="advisor.html">AI Advisor</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 FinWise AI Platform. All rights reserved. Underwriting outputs represent mathematical simulations and do not constitute direct banking approvals.</p>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal" aria-hidden="true" role="dialog" aria-labelledby="settings-modal-title">
+        <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="settings-modal-title"><i class="fa-solid fa-sliders text-accent"></i> API & Webhook Configuration</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settings-form" class="dashboard-form">
+                    <div class="form-group">
+                        <label for="settings-claude-key">Anthropic Claude API Key</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="settings-claude-key" class="form-input" placeholder="sk-ant-...">
+                            <button type="button" class="btn-toggle-visibility" onclick="togglePasswordVisibility('settings-claude-key')">
+                                <i class="fa-solid fa-eye" id="settings-claude-key-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="settings-sheets-url">Google Sheets Webhook</label>
+                        <input type="url" id="settings-sheets-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="settings-force-delay" checked>
+                        <label for="settings-force-delay">Simulate API Loading Network Delays (2.5 seconds)</label>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Discard</button>
+                        <button type="submit" class="btn btn-primary">Save System Config</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Reports Modal -->
+    <div class="modal" id="reports-modal" aria-hidden="true" role="dialog" aria-labelledby="reports-modal-title">
+        <div class="modal-backdrop" onclick="closeReportsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="reports-modal-title"><i class="fa-solid fa-folder-open text-primary"></i> Saved Underwriting Reports</h3>
+                <button class="modal-close" onclick="closeReportsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Historical diagnostics saved under Rahul's corporate profile:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Mortgage Telemetry FW-9827</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 5, 2026</span>
+                        </div>
+                        <a href="eligibility.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Personal Credit Pre-Check</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 3, 2026</span>
+                        </div>
+                        <a href="credit.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button class="btn btn-secondary btn-block" onclick="closeReportsModal()">Close Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Wrapper -->
+    <div class="toast-container" id="toast-wrapper"></div>
+
+    <!-- Scripts -->
+    <script src="../data/constants.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/advisor.js"></script>
+    <script src="../js/api.js"></script>
+</body>
+</html>

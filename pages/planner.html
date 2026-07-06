@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinWise AI - Financial Goal Planner</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    
+    <!-- Security Session Router loaded first -->
+    <script src="../js/auth.js"></script>
+</head>
+<body>
+
+    <!-- Sticky Header Navbar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-logo">
+                <div class="logo-glow"></div>
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </a>
+            
+            <div class="nav-actions">
+                <button class="btn btn-secondary btn-icon" id="open-settings-btn" title="API Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="btn-text">Developer API</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="logout-btn" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="btn-text">Sign Out</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container layout with sidebar -->
+    <main class="animate-fade-in" style="padding-top: 120px; padding-bottom: 80px;">
+        <div class="container">
+            <div class="section-header text-center">
+                <h1 class="section-title">Financial Goal Planner</h1>
+                <p class="section-subtitle">Map saving paths, simulate compound growth targets, and eliminate funding gaps instantly.</p>
+            </div>
+            
+            <div class="dashboard-container glass-card">
+                
+                <!-- Left Sidebar Navigation Pane -->
+                <aside class="dashboard-tabs">
+                    <a href="dashboard.html" class="tab-btn"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                    <a href="eligibility.html" class="tab-btn"><i class="fa-solid fa-clipboard-check"></i> Loan Checker</a>
+                    <a href="credit.html" class="tab-btn"><i class="fa-solid fa-gauge-high"></i> Credit Analyzer</a>
+                    <a href="calculator.html" class="tab-btn"><i class="fa-solid fa-calculator"></i> EMI Calculator</a>
+                    <a href="compare.html" class="tab-btn"><i class="fa-solid fa-code-compare"></i> Loan Comparison</a>
+                    <a href="planner.html" class="tab-btn active"><i class="fa-solid fa-bullseye"></i> Goal Planner</a>
+                    <a href="advisor.html" class="tab-btn"><i class="fa-solid fa-robot"></i> AI Advisor</a>
+                    <button type="button" onclick="openReportsModal()" class="tab-btn"><i class="fa-solid fa-folder-open"></i> Reports</button>
+                    <button type="button" onclick="openSettingsModal()" class="tab-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+                    <button type="button" onclick="handleLogout()" class="tab-btn text-red" style="margin-top: auto; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </aside>
+                
+                <!-- Right Content Pane -->
+                <div class="dashboard-content">
+                    
+                    <!-- Goal Selection Tags Row -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary active-goal-btn" id="btn-goal-house" onclick="selectGoal('house')">
+                            <i class="fa-solid fa-house"></i> Buy House
+                        </button>
+                        <button class="btn btn-secondary" id="btn-goal-car" onclick="selectGoal('car')">
+                            <i class="fa-solid fa-car"></i> Buy Car
+                        </button>
+                        <button class="btn btn-secondary" id="btn-goal-emergency" onclick="selectGoal('emergency')">
+                            <i class="fa-solid fa-shield-halved"></i> Emergency Fund
+                        </button>
+                        <button class="btn btn-secondary" id="btn-goal-retirement" onclick="selectGoal('retirement')">
+                            <i class="fa-solid fa-hands-holding-child"></i> Retirement
+                        </button>
+                    </div>
+
+                    <div class="panel-grid">
+                        
+                        <!-- Left controls side -->
+                        <div class="panel-input-side">
+                            <h3 class="panel-block-title" id="goal-form-title">House Purchase Parameters</h3>
+                            <form id="goal-form" class="dashboard-form">
+                                <div class="form-group">
+                                    <label for="range-goal-target" class="range-label">
+                                        <span>Target Savings Goal</span>
+                                        <span class="range-value" id="val-goal-target">₹50,00,000</span>
+                                    </label>
+                                    <input type="range" id="range-goal-target" class="slider-input" min="100000" max="20000000" step="100000" value="5000000">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="range-goal-time" class="range-label">
+                                        <span>Time Horizon</span>
+                                        <span class="range-value" id="val-goal-time">10 Years</span>
+                                    </label>
+                                    <input type="range" id="range-goal-time" class="slider-input" min="1" max="40" step="1" value="10">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="range-goal-monthly" class="range-label">
+                                        <span>Planned Monthly savings</span>
+                                        <span class="range-value" id="val-goal-monthly">₹25,000</span>
+                                    </label>
+                                    <input type="range" id="range-goal-monthly" class="slider-input" min="1000" max="200000" step="1000" value="25000">
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Right results side -->
+                        <div class="panel-result-side">
+                            <h3 class="panel-block-title">Goal Status Report</h3>
+                            
+                            <div class="status-summary-box" style="margin-bottom: 24px;">
+                                <div class="status-indicator-ring Approved" id="goal-status-indicator" style="border-color: var(--success); box-shadow: 0 0 15px var(--success-glow);">
+                                    <span class="status-text" id="goal-status-text">On Track</span>
+                                    <span class="status-sub" id="goal-progress-percent">60% Hit</span>
+                                </div>
+                                <div class="status-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Total Required:</span>
+                                        <span class="detail-value text-accent" id="goal-total-needed">₹50,00,000</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Accumulated (Simulated):</span>
+                                        <span class="detail-value" id="goal-accumulated">₹30,00,000</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Monthly Target:</span>
+                                        <span class="detail-value" id="goal-target-monthly">₹41,667</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Shortfall warning notice -->
+                            <div class="ai-suggestion-box" id="goal-warning-box" style="margin-top: 16px; border-left-color: var(--warning);">
+                                <div class="ai-suggest-title">
+                                    <i class="fa-solid fa-triangle-exclamation text-warning" id="goal-warning-icon"></i>
+                                    <span id="goal-warning-title">Savings shortfalls detected</span>
+                                </div>
+                                <p class="ai-suggest-text" id="goal-warning-text" style="font-size: 0.85rem; line-height: 1.5; color: var(--text-secondary);">
+                                    At your current savings pace of ₹25,000/mo, you will achieve ₹30,00,000 in 10 years, leaving a shortfall of ₹20,00,000. Increase monthly savings to ₹41,667 or extend the timeline.
+                                </p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="nav-logo">
+                    <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                    <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+                </div>
+                <p class="footer-bio">Empowering financial underwriting decisions through modern, accessible AI-driven data synthesis and interactive calculation models.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal" aria-hidden="true" role="dialog" aria-labelledby="settings-modal-title">
+        <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="settings-modal-title"><i class="fa-solid fa-sliders text-accent"></i> API & Webhook Configuration</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settings-form" class="dashboard-form">
+                    <div class="form-group">
+                        <label for="settings-claude-key">Anthropic Claude API Key</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="settings-claude-key" class="form-input" placeholder="sk-ant-...">
+                            <button type="button" class="btn-toggle-visibility" onclick="togglePasswordVisibility('settings-claude-key')">
+                                <i class="fa-solid fa-eye" id="settings-claude-key-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="settings-sheets-url">Google Sheets Webhook</label>
+                        <input type="url" id="settings-sheets-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="settings-force-delay" checked>
+                        <label for="settings-force-delay">Simulate API Loading Network Delays (2.5 seconds)</label>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Discard</button>
+                        <button type="submit" class="btn btn-primary">Save System Config</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Reports Modal -->
+    <div class="modal" id="reports-modal" aria-hidden="true" role="dialog" aria-labelledby="reports-modal-title">
+        <div class="modal-backdrop" onclick="closeReportsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="reports-modal-title"><i class="fa-solid fa-folder-open text-primary"></i> Saved Underwriting Reports</h3>
+                <button class="modal-close" onclick="closeReportsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Historical diagnostics saved under Rahul's corporate profile:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Mortgage Telemetry FW-9827</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 5, 2026</span>
+                        </div>
+                        <a href="eligibility.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Personal Credit Pre-Check</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 3, 2026</span>
+                        </div>
+                        <a href="credit.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button class="btn btn-secondary btn-block" onclick="closeReportsModal()">Close Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Wrapper -->
+    <div class="toast-container" id="toast-wrapper"></div>
+
+    <!-- Scripts -->
+    <script src="../data/constants.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/planner.js"></script>
+</body>
+</html>

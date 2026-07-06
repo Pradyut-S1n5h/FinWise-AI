@@ -1,0 +1,54 @@
+/* -------------------------------------------------------------
+   FINWISE AI - KEYFRAMES & INTERACTIVE TRANSITION ANIMATIONS
+------------------------------------------------------------- */
+
+/* Page & Element transitions */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in {
+    animation: slideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+/* Floating visuals animations */
+@keyframes float-slow {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
+}
+.animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-reverse {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(10px); }
+    100% { transform: translateY(0px); }
+}
+.animate-float-reverse {
+    animation: float-reverse 7s ease-in-out infinite;
+}
+
+/* AI Typing Bouncing Dots */
+@keyframes typing-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Pulsing alert indicators */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.animate-pulse {
+    animation: pulse 2s infinite;
+}

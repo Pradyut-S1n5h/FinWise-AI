@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinWise AI - Credit Analyzer Audit</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    
+    <!-- Chart.js and Security Session Router -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/auth.js"></script>
+</head>
+<body>
+
+    <!-- Sticky Header Navbar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-logo">
+                <div class="logo-glow"></div>
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </a>
+            
+            <nav class="nav-links" id="navbar-menu" role="navigation" aria-label="Main Navigation">
+                <a href="dashboard.html" class="nav-item">Overview</a>
+                <a href="eligibility.html" class="nav-item">Eligibility</a>
+                <a href="credit.html" class="nav-item active-nav">Credit Analysis</a>
+                <a href="calculator.html" class="nav-item">EMI Calculator</a>
+                <a href="advisor.html" class="nav-item">AI Advisor</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="btn btn-secondary btn-icon" id="open-settings-btn" title="API Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="btn-text">Developer API</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="logout-btn" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="btn-text">Sign Out</span>
+                </button>
+            </div>
+            
+            <button class="mobile-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navbar-menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-drawer" id="mobile-drawer-menu" aria-hidden="true">
+        <div class="drawer-header">
+            <div class="nav-logo">
+                <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+            </div>
+            <button class="drawer-close" id="mobile-drawer-close">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="dashboard.html" class="drawer-link-item">Overview</a>
+            <a href="eligibility.html" class="drawer-link-item">Eligibility</a>
+            <a href="credit.html" class="drawer-link-item active-nav">Credit Analysis</a>
+            <a href="calculator.html" class="drawer-link-item">EMI Calculator</a>
+            <a href="advisor.html" class="drawer-link-item">AI Advisor</a>
+            <button class="btn btn-secondary drawer-btn" id="open-settings-btn-mobile">
+                <i class="fa-solid fa-sliders"></i> Developer API
+            </button>
+            <button class="btn btn-secondary drawer-btn" id="logout-btn-mobile">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="animate-fade-in" style="padding-top: 120px; padding-bottom: 80px;">
+        <div class="container">
+            <div class="section-header text-center">
+                <h1 class="section-title">Credit Score Analyzer</h1>
+                <p class="section-subtitle">Examine key credit vectors, categorize ratings brackets, and trace custom roadmaps.</p>
+            </div>
+            
+            <div class="dashboard-container glass-card">
+                
+                <!-- Left Sidebar Navigation Pane -->
+                <aside class="dashboard-tabs">
+                    <a href="dashboard.html" class="tab-btn"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                    <a href="eligibility.html" class="tab-btn"><i class="fa-solid fa-clipboard-check"></i> Loan Checker</a>
+                    <a href="credit.html" class="tab-btn active"><i class="fa-solid fa-gauge-high"></i> Credit Analyzer</a>
+                    <a href="calculator.html" class="tab-btn"><i class="fa-solid fa-calculator"></i> EMI Calculator</a>
+                    <a href="compare.html" class="tab-btn"><i class="fa-solid fa-code-compare"></i> Loan Comparison</a>
+                    <a href="planner.html" class="tab-btn"><i class="fa-solid fa-bullseye"></i> Goal Planner</a>
+                    <a href="advisor.html" class="tab-btn"><i class="fa-solid fa-robot"></i> AI Advisor</a>
+                    <button type="button" onclick="openReportsModal()" class="tab-btn"><i class="fa-solid fa-folder-open"></i> Reports</button>
+                    <button type="button" onclick="openSettingsModal()" class="tab-btn"><i class="fa-solid fa-sliders"></i> Settings</button>
+                    <button type="button" onclick="handleLogout()" class="tab-btn text-red" style="margin-top: auto; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </aside>
+                
+                <div class="dashboard-content">
+                    <div class="panel-grid">
+                        
+                        <!-- Left controls side -->
+                        <div class="panel-input-side">
+                            <h3 class="panel-block-title">Credit Profile Audit</h3>
+                            <div class="credit-input-box">
+                                <div class="form-group">
+                                    <label for="range-credit-score" class="range-label">
+                                        <span>Current Credit Score</span>
+                                        <span class="range-value font-large" id="val-credit-analyzer">720</span>
+                                    </label>
+                                    <input type="range" id="range-credit-score" class="slider-input" min="300" max="850" value="720">
+                                </div>
+                                
+                                <div class="credit-scale-ticks">
+                                    <span class="tick text-red">300<br>Poor</span>
+                                    <span class="tick text-orange">580<br>Fair</span>
+                                    <span class="tick text-yellow">670<br>Good</span>
+                                    <span class="tick text-green">740<br>V. Good</span>
+                                    <span class="tick text-success">800-850<br>Excellent</span>
+                                </div>
+                            </div>
+                            
+                            <div class="advisor-factors-grid">
+                                <div class="factor-header">Positive Key Drivers</div>
+                                <ul class="factor-list positive">
+                                    <li><i class="fa-solid fa-circle-check"></i> Consistent on-time payment history (100%)</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Credit utilization index is low (18%)</li>
+                                    <li><i class="fa-solid fa-circle-check"></i> Clean public records and zero delinquencies</li>
+                                </ul>
+                                
+                                <div class="factor-header" style="margin-top: 12px;">Negative Risks / Concerns</div>
+                                <ul class="factor-list negative">
+                                    <li><i class="fa-solid fa-circle-xmark"></i> Average credit account age is low (2.4 Years)</li>
+                                    <li><i class="fa-solid fa-circle-xmark"></i> Recent hard inquiries detected (3 in last 6 months)</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="advisor-factors-grid" style="margin-top: 24px; border-top: 1px solid var(--border-light); padding-top: 20px;">
+                                <div class="factor-header" style="margin-bottom: 12px; text-align: center;"><i class="fa-solid fa-chart-pie text-accent"></i> Credit Factors Weight Breakdown</div>
+                                <div class="chart-container" style="height: 140px; position: relative;">
+                                    <canvas id="creditPieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right results side -->
+                        <div class="panel-result-side">
+                            <h3 class="panel-block-title">Credit Health Assessment</h3>
+                            
+                            <div class="credit-gauge-container">
+                                <div class="speedometer-box">
+                                    <svg viewBox="0 0 100 50" class="speedometer">
+                                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#222" stroke-width="10" stroke-linecap="round"/>
+                                        <path id="gauge-fill-arc" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#gauge-gradient)" stroke-width="10" stroke-linecap="round" stroke-dasharray="125" stroke-dashoffset="30"/>
+                                        
+                                        <defs>
+                                            <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#FF1744" />
+                                                <stop offset="35%" stop-color="#FF9100" />
+                                                <stop offset="65%" stop-color="#FFD600" />
+                                                <stop offset="85%" stop-color="#00C853" />
+                                                <stop offset="100%" stop-color="#00E5FF" />
+                                            </linearGradient>
+                                        </defs>
+                                        <polygon id="gauge-needle" points="49,50 51,50 50,15" fill="#fff" transform="rotate(30 50 50)"/>
+                                        <circle cx="50" cy="50" r="4" fill="#6C63FF"/>
+                                    </svg>
+                                    <div class="gauge-center-text">
+                                        <span class="gauge-score" id="gauge-score-val">720</span>
+                                        <span class="gauge-grade text-green" id="gauge-grade-val">Very Good</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="roadmaps-box">
+                                <div class="roadmap-header">
+                                    <i class="fa-solid fa-map text-accent"></i>
+                                    <span>Score Improvement Roadmap</span>
+                                </div>
+                                <div class="roadmap-timeline" id="credit-roadmap-container">
+                                    <!-- Dynamic elements from credit.js -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="nav-logo">
+                    <i class="fa-solid fa-brain-circuit logo-icon"></i>
+                    <span class="logo-text">FinWise <span class="accent-text">AI</span></span>
+                </div>
+                <p class="footer-bio">Empowering financial underwriting decisions through modern, accessible AI-driven data synthesis and interactive calculation models.</p>
+            </div>
+            
+            <div class="footer-links-grid">
+                <div class="links-col">
+                    <h5>Platform</h5>
+                    <a href="dashboard.html">Overview</a>
+                    <a href="eligibility.html">Eligibility</a>
+                    <a href="credit.html">Credit Analysis</a>
+                    <a href="calculator.html">EMI Calculator</a>
+                    <a href="advisor.html">AI Advisor</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 FinWise AI Platform. All rights reserved. Underwriting outputs represent mathematical simulations and do not constitute direct banking approvals.</p>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal" aria-hidden="true" role="dialog" aria-labelledby="settings-modal-title">
+        <div class="modal-backdrop" onclick="closeSettingsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="settings-modal-title"><i class="fa-solid fa-sliders text-accent"></i> API & Webhook Configuration</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settings-form" class="dashboard-form">
+                    <div class="form-group">
+                        <label for="settings-claude-key">Anthropic Claude API Key</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="settings-claude-key" class="form-input" placeholder="sk-ant-...">
+                            <button type="button" class="btn-toggle-visibility" onclick="togglePasswordVisibility('settings-claude-key')">
+                                <i class="fa-solid fa-eye" id="settings-claude-key-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="settings-sheets-url">Google Sheets Webhook</label>
+                        <input type="url" id="settings-sheets-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="settings-force-delay" checked>
+                        <label for="settings-force-delay">Simulate API Loading Network Delays (2.5 seconds)</label>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Discard</button>
+                        <button type="submit" class="btn btn-primary">Save System Config</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Reports Modal -->
+    <div class="modal" id="reports-modal" aria-hidden="true" role="dialog" aria-labelledby="reports-modal-title">
+        <div class="modal-backdrop" onclick="closeReportsModal()"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="reports-modal-title"><i class="fa-solid fa-folder-open text-primary"></i> Saved Underwriting Reports</h3>
+                <button class="modal-close" onclick="closeReportsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Historical diagnostics saved under Rahul's corporate profile:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Mortgage Telemetry FW-9827</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 5, 2026</span>
+                        </div>
+                        <a href="eligibility.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: var(--border-radius-sm);">
+                        <div>
+                            <strong style="font-size: 0.9rem; display: block; color: #FFF;">Personal Credit Pre-Check</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">Timestamp: July 3, 2026</span>
+                        </div>
+                        <a href="credit.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button class="btn btn-secondary btn-block" onclick="closeReportsModal()">Close Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Wrapper -->
+    <div class="toast-container" id="toast-wrapper"></div>
+
+    <!-- Scripts -->
+    <script src="../data/constants.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/credit.js"></script>
+</body>
+</html>

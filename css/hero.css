@@ -1,0 +1,367 @@
+/* -------------------------------------------------------------
+   FINWISE AI - HERO & AUTHENTICATION LANDING MODULES
+------------------------------------------------------------- */
+
+/* Grid Overlay & Glow Spheres for backgrounds */
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.glow-sphere {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 1;
+}
+.sphere-primary {
+    top: -10%;
+    right: 20%;
+    width: 500px;
+    height: 500px;
+    background: var(--primary);
+}
+.sphere-accent {
+    bottom: 20%;
+    left: 10%;
+    width: 400px;
+    height: 400px;
+    background: var(--accent);
+}
+
+/* Landing Authentication Page style */
+.login-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-main);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+}
+.login-section.hidden {
+    display: none !important;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 40px;
+    background: rgba(10, 12, 28, 0.8);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(108, 99, 255, 0.05);
+    position: relative;
+    z-index: 10;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.login-header .nav-logo {
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.login-header h2 {
+    font-size: 1.8rem;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+.login-header p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.demo-login-hint {
+    margin-top: 24px;
+    padding: 12px;
+    background: rgba(0, 229, 255, 0.04);
+    border: 1px dashed rgba(0, 229, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.demo-login-hint code {
+    font-family: monospace;
+    font-weight: 700;
+}
+
+/* Landing/Hero Section (MPA fallback index portal / main hub banner) */
+.hero-section {
+    position: relative;
+    padding-top: 180px;
+    padding-bottom: 120px;
+    overflow: hidden;
+}
+.hero-container {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 64px;
+    align-items: center;
+}
+.badge-container {
+    margin-bottom: 24px;
+}
+.hero-badge {
+    background: rgba(108, 99, 255, 0.08);
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    color: #FFF;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 15px rgba(108, 99, 255, 0.1);
+}
+.hero-title {
+    font-size: 3.8rem;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.04em;
+}
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    max-width: 600px;
+}
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 64px;
+}
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    border-top: 1px solid var(--border-light);
+    padding-top: 32px;
+}
+.stat-card h3 {
+    font-size: 2.2rem;
+    color: #FFF;
+    margin-bottom: 4px;
+    font-weight: 800;
+}
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Floating Mock Dashboard Visual */
+.hero-visual {
+    position: relative;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.floating-dashboard-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.floating-card {
+    position: absolute;
+    background: rgba(15, 18, 36, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    transition: var(--transition-smooth);
+}
+.floating-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--primary);
+    box-shadow: 0 30px 60px rgba(108, 99, 255, 0.15);
+}
+
+.card-risk {
+    top: 10%;
+    left: 0;
+    width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.card-risk .card-icon {
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(0, 229, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-data {
+    display: flex;
+    flex-direction: column;
+}
+.card-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.card-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.mini-sparkline {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 30px;
+}
+.mini-sparkline .bar {
+    width: 4px;
+    background: var(--border-light);
+    border-radius: 10px;
+}
+.mini-sparkline .bar-1 { height: 12px; }
+.mini-sparkline .bar-2 { height: 18px; }
+.mini-sparkline .bar-3 { height: 8px; }
+.mini-sparkline .bar-4 { height: 25px; }
+.mini-sparkline .bar.active { background: var(--accent); }
+
+.card-credit {
+    top: 30%;
+    right: 0;
+    width: 280px;
+}
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+.score-badge {
+    padding: 3px 8px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.badge-excellent {
+    background: rgba(0, 200, 83, 0.1);
+    color: var(--success);
+}
+.credit-big-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50px;
+    overflow: hidden;
+}
+.progress-bar {
+    height: 100%;
+    border-radius: 50px;
+}
+.fill-excellent { background: var(--success); }
+
+.card-savings {
+    bottom: 5%;
+    left: 20%;
+    width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.circle-chart {
+    width: 50px;
+    height: 50px;
+    position: relative;
+}
+.circular-chart {
+    display: block;
+    max-height: 100%;
+}
+.circle-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.05);
+    stroke-width: 2.8;
+}
+.circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke: var(--primary);
+}
+.circle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Responsive configurations */
+@media (max-width: 992px) {
+    .hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .hero-buttons {
+        justify-content: center;
+    }
+    .hero-stats {
+        width: 100%;
+        max-width: 500px;
+    }
+    .hero-visual {
+        display: none;
+    }
+}
+@media (max-width: 768px) {
+    .hero-section {
+        padding-top: 130px;
+        padding-bottom: 80px;
+    }
+    .hero-title {
+        font-size: 2.8rem;
+    }
+    .hero-stats {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
