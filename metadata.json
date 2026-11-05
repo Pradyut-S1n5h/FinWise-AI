@@ -1,0 +1,6 @@
+{
+  "name": "FinWise AI",
+  "description": "Intelligent, private, and mathematically grounded personal financial management platform with forecasting, budgeting, calculators, and AI copilot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
