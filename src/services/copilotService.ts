@@ -26,12 +26,16 @@ export function clearGeminiApiKey(): void {
 }
 
 export async function testGeminiApiKey(apiKey: string): Promise<string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (apiKey.trim()) {
+    headers['x-gemini-api-key'] = apiKey.trim();
+  }
+
   const response = await fetch('/api/ai/test', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-gemini-api-key': apiKey.trim(),
-    },
+    headers,
     signal: AbortSignal.timeout(20_000),
     body: JSON.stringify({}),
   });
@@ -198,22 +202,18 @@ export async function askFinancialCopilot(
   };
 
   const apiKey = getGeminiApiKey();
-  if (!apiKey) {
-    return {
-      reply: generateLocalFinancialAdvice(message, state),
-      source: 'local_engine',
-      notice: 'Add a Gemini API key in Settings to enable AI responses.',
-    };
-  }
-
   let fallbackNotice = 'Gemini is unavailable. Showing local analysis.';
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey.trim()) {
+      headers['x-gemini-api-key'] = apiKey.trim();
+    }
+
     const res = await fetch('/api/ai/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-gemini-api-key': apiKey,
-      },
+      headers,
       signal: AbortSignal.timeout(75_000),
       body: JSON.stringify({
         message,

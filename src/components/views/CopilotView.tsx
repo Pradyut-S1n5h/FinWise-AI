@@ -204,7 +204,7 @@ I analyze your actual manual ledger, cash flow, and savings goals to give mathem
                   <span>{msg.timestamp}</span>
                   {!isUser && msg.source && (
                     <span className="font-medium">
-                      {msg.source === 'gemini' ? 'Gemini 3.8 Flash' : 'FinWise Math Engine'}
+                      {msg.source === 'gemini' ? 'Gemini 2.5 Flash' : 'FinWise Math Engine'}
                     </span>
                   )}
                 </div>

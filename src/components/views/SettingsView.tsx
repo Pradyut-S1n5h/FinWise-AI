@@ -136,15 +136,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleTestGeminiKey = async () => {
-    if (!geminiApiKey.trim()) {
-      setGeminiKeyStatus('Enter a Gemini API key before testing.');
-      return;
-    }
     setIsTestingGeminiKey(true);
-    setGeminiKeyStatus('Checking Gemini API key…');
+    setGeminiKeyStatus(geminiApiKey.trim() ? 'Checking Gemini API key…' : 'Checking the server Gemini configuration…');
     try {
       const model = await testGeminiApiKey(geminiApiKey);
-      setGeminiKeyStatus(`${model} is reachable. Save the key to use it in Copilot.`);
+      setGeminiKeyStatus(geminiApiKey.trim()
+        ? `${model} is reachable. Save the key to use it in Copilot.`
+        : `${model} is reachable using the server configuration.`);
     } catch (error) {
       setGeminiKeyStatus(error instanceof Error ? error.message : 'Gemini key test failed.');
     } finally {
@@ -175,7 +173,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <KeyRound className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Gemini AI Configuration
         </h2>
         <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-          Add a Gemini API key to enable AI Copilot. The key is stored only in this browser and sent to this app’s server for Gemini requests; it is not saved by the server. Anyone with access to this browser profile may be able to access the key. Your financial data remains in this browser and the context you ask about is sent to Google Gemini when you chat.
+          Recommended: configure GEMINI_API_KEY in the server environment or Codespaces secrets. You can also save a key in this browser; it is sent to this app’s server and anyone with access to this browser profile may be able to access it. Your financial data remains in this browser, and the context you ask about is sent to Google Gemini when you chat.
         </p>
         <form onSubmit={handleSaveGeminiKey} className="flex flex-col gap-2 sm:flex-row">
           <input
@@ -199,7 +197,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             disabled={isTestingGeminiKey}
             className="rounded-lg border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60 dark:border-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-950"
           >
-            {isTestingGeminiKey ? 'Testing…' : 'Test Key'}
+            {isTestingGeminiKey ? 'Testing…' : 'Test Connection'}
           </button>
           <button
             type="button"
@@ -210,7 +208,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </button>
         </form>
         <p role="status" className="min-h-4 text-[11px] text-slate-500 dark:text-slate-400">
-          {geminiKeyStatus || (getGeminiApiKey() ? 'A Gemini API key is saved in this browser.' : 'No Gemini API key is configured. Copilot will use local analysis.')}
+          {geminiKeyStatus || (getGeminiApiKey() ? 'A Gemini API key is saved in this browser.' : 'No browser key is saved. The server may provide GEMINI_API_KEY; test the connection to check.')}
         </p>
       </section>
 

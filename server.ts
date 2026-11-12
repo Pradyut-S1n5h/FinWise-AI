@@ -85,7 +85,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 app.post('/api/ai/test', async (req: Request, res: Response) => {
   const apiKey = req.get('x-gemini-api-key')?.trim() || process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey.length > 256) {
-    res.status(400).json({ error: 'Enter a valid Gemini API key.' });
+    res.status(400).json({ error: 'Configure GEMINI_API_KEY on the server or enter a Gemini API key in Settings.' });
     return;
   }
 
@@ -121,7 +121,7 @@ app.post('/api/ai/chat', async (req: Request, res: Response) => {
   const apiKeyHeader = req.get('x-gemini-api-key');
   const apiKey = apiKeyHeader?.trim() || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    res.status(400).json({ error: 'Add your Gemini API key in Settings to use Gemini.' });
+    res.status(400).json({ error: 'Configure GEMINI_API_KEY on the server or add a key in Settings to use Gemini.' });
     return;
   }
   if (apiKey.length > 256) {
