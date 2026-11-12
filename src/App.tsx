@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from './components/common/Navbar';
 import { Sidebar, TabKey } from './components/common/Sidebar';
 import { DashboardView } from './components/views/DashboardView';
@@ -39,11 +39,15 @@ import {
   applyTransactionEffects,
   revertTransactionEffects,
 } from './services/accounting';
+import { convertFinancialState, getExchangeRates } from './services/currencyService';
 
 export default function App() {
   const [state, setState] = useState<FinancialState>(loadFinancialState());
+  const stateRef = useRef(state);
   const [currentTab, setCurrentTab] = useState<TabKey>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCurrencyChanging, setIsCurrencyChanging] = useState(false);
+  const [currencyNotice, setCurrencyNotice] = useState<{ message: string; error: boolean } | null>(null);
 
   // Modals state
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
@@ -57,6 +61,7 @@ export default function App() {
   // Sync state to storage and theme class
   useEffect(() => {
     const unsub = subscribeToStateChanges((updated) => {
+      stateRef.current = updated;
       setState(updated);
     });
     return unsub;
@@ -80,6 +85,7 @@ export default function App() {
   }, []);
 
   const handleUpdateState = (newState: FinancialState) => {
+    stateRef.current = newState;
     setState(newState);
     saveFinancialState(newState);
   };
@@ -92,11 +98,32 @@ export default function App() {
     });
   };
 
-  const handleCurrencyChange = (c: CurrencyCode) => {
-    handleUpdateState({
-      ...state,
-      profile: { ...state.profile, currency: c },
-    });
+  const handleCurrencyChange = async (targetCurrency: CurrencyCode) => {
+    const sourceCurrency = stateRef.current.profile.currency;
+    if (targetCurrency === sourceCurrency || isCurrencyChanging) return;
+
+    setIsCurrencyChanging(true);
+    setCurrencyNotice(null);
+    try {
+      const exchangeRates = await getExchangeRates(sourceCurrency);
+      const rate = exchangeRates.rates[targetCurrency];
+      if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {
+        throw new Error(`No exchange rate is available for ${targetCurrency}.`);
+      }
+
+      handleUpdateState(convertFinancialState(stateRef.current, targetCurrency, rate));
+      setCurrencyNotice({
+        message: `All amounts converted at 1 ${sourceCurrency} = ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${targetCurrency}. Rate updated ${new Date(exchangeRates.updatedAt).toLocaleString()}.`,
+        error: false,
+      });
+    } catch (error) {
+      setCurrencyNotice({
+        message: error instanceof Error ? error.message : 'Currency conversion failed. No amounts were changed.',
+        error: true,
+      });
+    } finally {
+      setIsCurrencyChanging(false);
+    }
   };
 
   // Transaction Actions
@@ -211,6 +238,7 @@ export default function App() {
         displayName={state.profile.displayName}
         currency={state.profile.currency}
         onCurrencyChange={handleCurrencyChange}
+        isCurrencyChanging={isCurrencyChanging}
         theme={state.profile.theme}
         onThemeToggle={handleThemeToggle}
         onOpenAddTransaction={() => {
@@ -235,6 +263,18 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 max-w-7xl mx-auto w-full">
+          {currencyNotice && (
+            <div
+              role={currencyNotice.error ? 'alert' : 'status'}
+              className={`mb-4 rounded-lg border px-3 py-2 text-xs ${
+                currencyNotice.error
+                  ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'
+                  : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
+              }`}
+            >
+              {currencyNotice.message}
+            </div>
+          )}
           {currentTab === 'dashboard' && (
             <DashboardView
               state={state}
@@ -320,6 +360,9 @@ export default function App() {
             <SettingsView
               state={state}
               onUpdateState={handleUpdateState}
+              onCurrencyChange={handleCurrencyChange}
+              isCurrencyChanging={isCurrencyChanging}
+              currencyStatus={currencyNotice?.message}
               onLoadDemoData={() => handleUpdateState(resetToDemoState())}
               onResetData={() => handleUpdateState(resetToEmptyState())}
               onOpenImportCSV={() => setIsCSVImportOpen(true)}

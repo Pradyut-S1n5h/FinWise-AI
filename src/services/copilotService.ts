@@ -2,12 +2,44 @@ import { FinancialState } from '../types/finance';
 import { computeFinancialSummary } from './accounting';
 import { formatCurrency } from '../utils/formatters';
 
+const GEMINI_API_KEY_STORAGE = 'finwise_gemini_api_key_v1';
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
   source?: 'gemini' | 'local_engine';
+  notice?: string;
+}
+
+export function getGeminiApiKey(): string {
+  return localStorage.getItem(GEMINI_API_KEY_STORAGE) || '';
+}
+
+export function saveGeminiApiKey(apiKey: string): void {
+  localStorage.setItem(GEMINI_API_KEY_STORAGE, apiKey.trim());
+}
+
+export function clearGeminiApiKey(): void {
+  localStorage.removeItem(GEMINI_API_KEY_STORAGE);
+}
+
+export async function testGeminiApiKey(apiKey: string): Promise<string> {
+  const response = await fetch('/api/ai/test', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-gemini-api-key': apiKey.trim(),
+    },
+    signal: AbortSignal.timeout(20_000),
+    body: JSON.stringify({}),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data?.valid !== true || typeof data.model !== 'string') {
+    throw new Error(typeof data?.error === 'string' ? data.error : 'Could not verify the Gemini API key.');
+  }
+  return data.model;
 }
 
 /**
@@ -111,10 +143,20 @@ export async function askFinancialCopilot(
   message: string,
   state: FinancialState,
   history: ChatMessage[] = []
-): Promise<{ reply: string; source: 'gemini' | 'local_engine' }> {
+): Promise<{ reply: string; source: 'gemini' | 'local_engine'; notice?: string }> {
   const summary = computeFinancialSummary(state);
 
-  // Send aggregated safe summary context to server proxy
+  const categoryNames = new Map(state.categories.map((category) => [category.id, category.name]));
+  const recentTransactions = [...state.transactions]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 100)
+    .map((transaction) => ({
+      date: transaction.date,
+      type: transaction.type,
+      amount: transaction.amount,
+      category: transaction.categoryId ? categoryNames.get(transaction.categoryId) || 'Uncategorized' : undefined,
+    }));
+
   const safeContext = {
     displayName: state.profile.displayName,
     currency: state.profile.currency,
@@ -130,12 +172,23 @@ export async function askFinancialCopilot(
     netWorth: summary.netWorth,
     healthScore: `${summary.healthScore}/100 (${summary.healthStatus})`,
     emergencyFundMonths: summary.emergencyFundCoverageMonths.toFixed(1),
-    categoriesCount: state.categories.length,
+    budgets: state.categories.map((category) => ({
+      category: category.name,
+      monthlyBudget: category.monthlyBudget,
+    })),
+    recentTransactions,
+    transactionCount: state.transactions.length,
+    recentTransactionsTruncated: state.transactions.length > recentTransactions.length,
+    incomeSources: state.incomeSources.filter((source) => source.isActive).map((source) => ({
+      name: source.name,
+      amount: source.amount,
+      frequency: source.frequency,
+    })),
     activeGoals: state.goals.map((g) => ({
       name: g.name,
       target: g.targetAmount,
       saved: g.currentSaved,
-      pct: Math.round((g.currentSaved / g.targetAmount) * 100),
+      pct: g.targetAmount > 0 ? Math.round((g.currentSaved / g.targetAmount) * 100) : 0,
     })),
     liabilities: state.liabilities.map((l) => ({
       name: l.name,
@@ -144,11 +197,24 @@ export async function askFinancialCopilot(
     })),
   };
 
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+    return {
+      reply: generateLocalFinancialAdvice(message, state),
+      source: 'local_engine',
+      notice: 'Add a Gemini API key in Settings to enable AI responses.',
+    };
+  }
+
+  let fallbackNotice = 'Gemini is unavailable. Showing local analysis.';
   try {
     const res = await fetch('/api/ai/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(6000),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-gemini-api-key': apiKey,
+      },
+      signal: AbortSignal.timeout(75_000),
       body: JSON.stringify({
         message,
         financialContext: safeContext,
@@ -159,17 +225,21 @@ export async function askFinancialCopilot(
       }),
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.reply && data.source === 'gemini') {
-        return { reply: data.reply, source: 'gemini' };
-      }
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.reply && data.source === 'gemini') {
+      return { reply: data.reply, source: 'gemini' };
+    }
+    if (typeof data?.error === 'string') {
+      fallbackNotice = `${data.error} Showing local analysis.`;
     }
   } catch (err) {
-    console.warn('Backend Gemini API call skipped or timed out, using local financial engine:', err);
+    console.warn('Backend Gemini request failed; using local financial analysis.');
+    fallbackNotice = err instanceof DOMException && err.name === 'TimeoutError'
+      ? 'Gemini took too long to respond. Showing local analysis.'
+      : 'Could not reach Gemini. Showing local analysis.';
   }
 
   // Graceful local engine fallback
   const localReply = generateLocalFinancialAdvice(message, state);
-  return { reply: localReply, source: 'local_engine' };
+  return { reply: localReply, source: 'local_engine', notice: fallbackNotice };
 }

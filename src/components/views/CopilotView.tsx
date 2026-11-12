@@ -76,6 +76,7 @@ I analyze your actual manual ledger, cash flow, and savings goals to give mathem
         content: response.reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         source: response.source,
+        notice: response.notice,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -118,11 +119,11 @@ I analyze your actual manual ledger, cash flow, and savings goals to give mathem
                 FinWise AI Copilot
               </h2>
               <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.2 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                <ShieldCheck className="h-2.5 w-2.5" /> Private Grounding
+                <ShieldCheck className="h-2.5 w-2.5" /> Ledger Grounding
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Grounded on your actual ledger figures • Works with server Gemini & offline engine
+              Grounded in this browser’s ledger • Gemini 2.5 Flash or local analysis
             </p>
           </div>
         </div>
@@ -190,6 +191,11 @@ I analyze your actual manual ledger, cash flow, and savings goals to give mathem
                 }`}
               >
                 <div className="whitespace-pre-wrap">{msg.content}</div>
+                {msg.notice && (
+                  <div className="mt-2 border-t border-amber-200 pt-2 text-[10px] text-amber-700 dark:border-amber-900 dark:text-amber-300">
+                    {msg.notice}
+                  </div>
+                )}
                 <div
                   className={`mt-1.5 flex items-center justify-between text-[10px] ${
                     isUser ? 'text-emerald-200' : 'text-slate-400'

@@ -15,7 +15,8 @@ import { formatCurrency } from '../../utils/formatters';
 interface NavbarProps {
   displayName: string;
   currency: CurrencyCode;
-  onCurrencyChange: (c: CurrencyCode) => void;
+  onCurrencyChange: (c: CurrencyCode) => Promise<void>;
+  isCurrencyChanging: boolean;
   theme: ThemeMode;
   onThemeToggle: () => void;
   onOpenAddTransaction: () => void;
@@ -29,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   displayName,
   currency,
   onCurrencyChange,
+  isCurrencyChanging,
   theme,
   onThemeToggle,
   onOpenAddTransaction,
@@ -87,9 +89,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Currency Selector */}
         <select
           value={currency}
-          onChange={(e) => onCurrencyChange(e.target.value as CurrencyCode)}
+          disabled={isCurrencyChanging}
+          onChange={(e) => void onCurrencyChange(e.target.value as CurrencyCode)}
           aria-label="Currency"
-          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
         >
           {Object.values(SUPPORTED_CURRENCIES).map((c) => (
             <option key={c.code} value={c.code}>

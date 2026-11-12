@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Settings as SettingsIcon,
   User,
@@ -12,6 +12,7 @@ import {
   Sun,
   Check,
   AlertTriangle,
+  KeyRound,
 } from 'lucide-react';
 import {
   CurrencyCode,
@@ -20,11 +21,20 @@ import {
   ThemeMode,
 } from '../../types/finance';
 import { exportStateAsJSON, importStateFromJSON } from '../../services/storage';
+import {
+  clearGeminiApiKey,
+  getGeminiApiKey,
+  saveGeminiApiKey,
+  testGeminiApiKey,
+} from '../../services/copilotService';
 import { downloadFile } from '../../services/csvService';
 
 interface SettingsViewProps {
   state: FinancialState;
   onUpdateState: (newState: FinancialState) => void;
+  onCurrencyChange: (currency: CurrencyCode) => Promise<void>;
+  isCurrencyChanging: boolean;
+  currencyStatus?: string;
   onLoadDemoData: () => void;
   onResetData: () => void;
   onOpenImportCSV: () => void;
@@ -33,12 +43,14 @@ interface SettingsViewProps {
 export const SettingsView: React.FC<SettingsViewProps> = ({
   state,
   onUpdateState,
+  onCurrencyChange,
+  isCurrencyChanging,
+  currencyStatus,
   onLoadDemoData,
   onResetData,
   onOpenImportCSV,
 }) => {
   const [displayName, setDisplayName] = useState(state.profile.displayName);
-  const [currency, setCurrency] = useState<CurrencyCode>(state.profile.currency);
   const [expectedIncome, setExpectedIncome] = useState(state.profile.monthlyIncomeExpected.toString());
   const [emergencyMonths, setEmergencyMonths] = useState(
     (state.profile.emergencyFundTargetMonths || 6).toString()
@@ -46,6 +58,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [theme, setTheme] = useState<ThemeMode>(state.profile.theme || 'dark');
   const [statusMsg, setStatusMsg] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState(() => getGeminiApiKey());
+  const [geminiKeyStatus, setGeminiKeyStatus] = useState('');
+  const [isTestingGeminiKey, setIsTestingGeminiKey] = useState(false);
+
+  useEffect(() => {
+    setExpectedIncome(state.profile.monthlyIncomeExpected.toString());
+  }, [state.profile.currency, state.profile.monthlyIncomeExpected]);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +73,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       profile: {
         ...state.profile,
         displayName: displayName.trim() || 'FinWise User',
-        currency,
         monthlyIncomeExpected: parseFloat(expectedIncome) || 45000,
         emergencyFundTargetMonths: parseInt(emergencyMonths) || 6,
         theme,
@@ -93,6 +111,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     reader.readAsText(file);
   };
 
+  const handleSaveGeminiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!geminiApiKey.trim()) {
+      setGeminiKeyStatus('Enter a Gemini API key before saving.');
+      return;
+    }
+    try {
+      saveGeminiApiKey(geminiApiKey);
+      setGeminiKeyStatus('Gemini API key saved in this browser.');
+    } catch {
+      setGeminiKeyStatus('Could not save the key in browser storage.');
+    }
+  };
+
+  const handleClearGeminiKey = () => {
+    try {
+      clearGeminiApiKey();
+      setGeminiApiKey('');
+      setGeminiKeyStatus('Gemini API key removed from this browser.');
+    } catch {
+      setGeminiKeyStatus('Could not remove the key from browser storage.');
+    }
+  };
+
+  const handleTestGeminiKey = async () => {
+    if (!geminiApiKey.trim()) {
+      setGeminiKeyStatus('Enter a Gemini API key before testing.');
+      return;
+    }
+    setIsTestingGeminiKey(true);
+    setGeminiKeyStatus('Checking Gemini API key…');
+    try {
+      const model = await testGeminiApiKey(geminiApiKey);
+      setGeminiKeyStatus(`${model} is reachable. Save the key to use it in Copilot.`);
+    } catch (error) {
+      setGeminiKeyStatus(error instanceof Error ? error.message : 'Gemini key test failed.');
+    } finally {
+      setIsTestingGeminiKey(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl space-y-6">
       {/* View Header */}
@@ -110,6 +169,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <Check className="h-4 w-4" /> {statusMsg}
         </div>
       )}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+          <KeyRound className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Gemini AI Configuration
+        </h2>
+        <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          Add a Gemini API key to enable AI Copilot. The key is stored only in this browser and sent to this app’s server for Gemini requests; it is not saved by the server. Anyone with access to this browser profile may be able to access the key. Your financial data remains in this browser and the context you ask about is sent to Google Gemini when you chat.
+        </p>
+        <form onSubmit={handleSaveGeminiKey} className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="password"
+            autoComplete="new-password"
+            value={geminiApiKey}
+            onChange={(e) => setGeminiApiKey(e.target.value)}
+            placeholder="Paste your Gemini API key"
+            aria-label="Gemini API key"
+            className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500"
+          >
+            Save Key
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleTestGeminiKey()}
+            disabled={isTestingGeminiKey}
+            className="rounded-lg border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 disabled:opacity-60 dark:border-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-950"
+          >
+            {isTestingGeminiKey ? 'Testing…' : 'Test Key'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClearGeminiKey}
+            className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Clear
+          </button>
+        </form>
+        <p role="status" className="min-h-4 text-[11px] text-slate-500 dark:text-slate-400">
+          {geminiKeyStatus || (getGeminiApiKey() ? 'A Gemini API key is saved in this browser.' : 'No Gemini API key is configured. Copilot will use local analysis.')}
+        </p>
+      </section>
 
       {/* 1. Profile & Preferences */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
@@ -133,12 +236,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Display Currency
+                Convert All Financial Records
               </label>
               <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                value={state.profile.currency}
+                disabled={isCurrencyChanging}
+                onChange={(e) => void onCurrencyChange(e.target.value as CurrencyCode)}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 {Object.values(SUPPORTED_CURRENCIES).map((c) => (
                   <option key={c.code} value={c.code}>
@@ -146,11 +250,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   </option>
                 ))}
               </select>
+              <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                {currencyStatus || 'Uses daily reference exchange rates. All saved amounts are converted; your bank may use different rates and fees.'}
+              </p>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Expected Baseline Monthly Income ({currency})
+                Expected Baseline Monthly Income ({state.profile.currency})
               </label>
               <input
                 type="number"
@@ -197,7 +304,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <ul className="text-xs text-slate-500 dark:text-slate-400 list-disc list-inside space-y-1">
           <li>All account balances, transactions, and liabilities are stored locally in your browser storage.</li>
           <li>No integration with banking credentials, UPI PINs, CVV codes, or external payment gateways.</li>
-          <li>The AI Copilot communicates via a server-side proxy without saving your personal financial records to any third-party marketing databases.</li>
+          <li>Financial records stay in this browser. When you use Gemini, the relevant financial context and chat message are sent to Google; the app server does not save them or your API key.</li>
           <li>You retain 100% data portability via JSON backup files and CSV exports.</li>
         </ul>
       </div>
