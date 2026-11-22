@@ -148,94 +148,68 @@ function executeAdvisorQuery(query) {
     const p = window.state.currentProfile || { income: 6500, existingEmi: 800, creditScore: 710 };
     const r = window.state.calculatedData || { dtiRatio: 12.3, approvalStatus: 'Approved', riskLevel: 'Low Risk' };
     
-    // Check if Claude API key is configured
-    if (window.state.settings && window.state.settings.claudeKey) {
-        if (window.queryClaudeAPI) {
-            window.queryClaudeAPI(query);
-            return;
-        }
+    // Show typing indicator
+    if (indicator) {
+        indicator.classList.remove('hidden');
+        indicator.classList.add('visible');
     }
     
-    // Intelligent local fallback rules engine
-    const generateLocalResponse = () => {
-        let answer = '';
-        const queryLower = query.toLowerCase();
-        
-        if (queryLower.includes('saving') || queryLower.includes('savings')) {
-            const estExpenses = Math.round(p.income * 0.4) + p.existingEmi;
-            const estSavings = Math.round(p.income * 0.2);
-            const emergencyFund = estSavings * 6;
-            answer = `
-#### AI Saving Blueprint
-Based on your **₹${p.income.toLocaleString('en-IN')}** monthly income and **₹${estExpenses.toLocaleString('en-IN')}** expenses, you can save **₹${estSavings.toLocaleString('en-IN')}** per month and build an emergency fund of **₹${emergencyFund.toLocaleString('en-IN')}** in six months.
-
-- **Overhead Control:** Keep fixed needs and bills below ₹${estExpenses.toLocaleString('en-IN')} to protect your capacity.
-- **Auto Drafts Setup:** Route ₹${estSavings.toLocaleString('en-IN')} mid-cycle to a separate emergency vault account.
-- **Liquidity Lock:** Maintain this plan for 180 days to achieve full safety status.
-            `;
-        } else if (queryLower.includes('budget')) {
-            answer = `
-#### Customized 50/30/20 Budgeting Framework
-Optimized for monthly revenues of **₹${p.income.toLocaleString('en-IN')}**:
-
-| Budget Category | Ideal Split (%) | Allocated Budget (₹) | Your Profile Status |
-| :--- | :--- | :--- | :--- |
-| **Needs (Rent, Bills)** | 50% | ₹${(p.income * 0.5).toLocaleString('en-IN')} | Debt consumes ₹${p.existingEmi.toLocaleString('en-IN')} |
-| **Wants (Dining, Gym)** | 30% | ₹${(p.income * 0.3).toLocaleString('en-IN')} | Keep below ₹${(p.income * 0.2).toLocaleString('en-IN')} |
-| **Savings (HYSA, IRA)** | 20% | ₹${(p.income * 0.2).toLocaleString('en-IN')} | Automated goal targets |
-
-**Advisory Notes:** 
-Your existing debt EMIs of **₹${p.existingEmi.toLocaleString('en-IN')}** consume a sizable portion of your Needs pocket. Keep additional lifestyle costs minimal.
-            `;
-        } else if (queryLower.includes('debt') || queryLower.includes('avalanche') || queryLower.includes('snowball')) {
-            answer = `
-#### Debt Reduction Strategy Analysis
-Your credit profile score is **${p.creditScore}** with monthly debt obligations of **₹${p.existingEmi.toLocaleString('en-IN')}**:
-
-- **Recommended: Debt Avalanche Model**
-  - Order debt items by highest interest rate. Pay minimum drafts on all except the highest rate account.
-  - Dedicate excess capital of **₹${(p.income * 0.1).toLocaleString('en-IN')}** monthly toward the target card.
-- **Alternative: Debt Snowball Model**
-  - Repay cards with the smallest absolute balances first to achieve quick psychological milestones.
-  - Works best if your score of **${p.creditScore}** is impacted by high account balances on multiple store cards.
-            `;
-        } else if (queryLower.includes('emergency')) {
-            const estExpenses = Math.round(p.income * 0.4) + p.existingEmi;
-            const estSavings = Math.round(p.income * 0.2);
-            const emergencyFund = estSavings * 6;
-            answer = `
-#### Emergency Fund Blueprint
-Based on your **₹${p.income.toLocaleString('en-IN')}** monthly income and **₹${estExpenses.toLocaleString('en-IN')}** expenses, you can save **₹${estSavings.toLocaleString('en-IN')}** per month and build an emergency fund of **₹${emergencyFund.toLocaleString('en-IN')}** in six months.
-
-- **Target Reserve Envelope:** ₹${emergencyFund.toLocaleString('en-IN')} (covers 6 months of basic needs).
-- **Monthly Contribution:** Allocate ₹${estSavings.toLocaleString('en-IN')} directly from payroll deposits.
-- **Storage Recommendation:** Utilize a liquid savings account with automatic draft bounds to prevent premature withdrawals.
-            `;
-        } else {
-            answer = `
-#### FinWise Financial Advisory Brief
-Your loaded profile parameters:
-- **Net Income:** ₹${p.income.toLocaleString('en-IN')}/mo
-- **Credit integrity:** Rating category: **${p.creditScore}**
-- **Underwriting Risks:** DTI Ratio: **${r.dtiRatio.toFixed(1)}%**
-
-To answer your specific query regarding *"${query}"*:
-We suggest keeping fixed leverage elements (existing loans and card debt) below a **36% DTI limit**. For personalized lending structures, please finalize your parameter calculations inside the *Eligibility Tab* and download your Underwriting Certificate.
-            `;
+    // Send to Gemini backend
+    fetch('/api/gemini/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            message: query,
+            conversationHistory: window.state.chatHistory || []
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('AI service error: ' + response.status);
         }
+        return response.json();
+    })
+    .then(data => {
+        if (indicator) indicator.classList.add('hidden');
+        
+        if (data.success && data.response) {
+            // Append bot response
+            appendChatMessage(data.response, 'bot');
+            
+            // Update conversation history
+            if (!window.state.chatHistory) window.state.chatHistory = [];
+            window.state.chatHistory.push(
+                { role: 'user', parts: [query] },
+                { role: 'model', parts: [data.response] }
+            );
+        } else {
+            throw new Error(data.error || 'Unexpected response from AI service');
+        }
+    })
+    .catch(err => {
+        console.error('Gemini API Query failed:', err);
         
         if (indicator) indicator.classList.add('hidden');
-        appendChatMessage(answer.trim(), 'bot');
-    };
+        
+        // Show user-friendly error message
+        let userMessage;
+        if (err.message.includes('API key')) {
+            userMessage = 'Please configure your Google Gemini API key in the AI Settings.';
+        } else if (err.message.includes('quota')) {
+            userMessage = 'Google Gemini API quota exceeded. Please try again later.';
+        } else {
+            userMessage = 'Unable to connect to AI service. Please try again later.';
+        }
+        
+        if (userMessage && window.appendChatMessage) {
+            window.appendChatMessage(userMessage, 'bot');
+        }
+    });
     
-    const forceDelay = window.state.settings ? window.state.settings.forceDelay : true;
-    const delay = forceDelay ? (window.CONFIG ? window.CONFIG.DELAYS.AI_CO_PILOT : 1800) : 0;
-    
-    if (delay > 0) {
-        setTimeout(generateLocalResponse, delay);
-    } else {
-        generateLocalResponse();
-    }
+    // Prevent the local fallback from running if the fetch started
+    // The fetch is asynchronous, so we let it complete or fail naturally
 }
 
 // Expose prompt function globally
